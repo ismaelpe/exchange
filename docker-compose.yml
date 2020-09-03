@@ -1,0 +1,34 @@
+version: '2'
+
+# Names our volume
+volumes:
+  my-db:
+services:
+    db:
+        build: db/.
+        image: comismael/ics_db
+        environment:
+            - MYSQL_USER=root
+            - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+            - MYSQL_DATABASE=isbancontrolsuite
+        ports:
+            - 3306:3306
+        command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8 --explicit_defaults_for_timestamp
+        volumes:
+        - my-db:/var/lib/mysql
+    app:
+        build: app/.
+        image: comismael/ics_app
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod,swagger
+            - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/isbancontrolsuite?useUnicode=true&characterEncoding=utf8&useSSL=false
+            - SPRING_DATASOURCE_USERNAME=root
+            - SPRING_DATASOURCE_PASSWORD=
+            - JHIPSTER_SLEEP=10 # gives time for the database to boot before the application
+        ports:
+            - 8080:8080
+        expose:
+        # Opens port 8080 on the container
+            - '8080'
+        logging:
+            driver: 'json-file'
